@@ -29,6 +29,8 @@ func playGame() {
 
 	rightAnswer := rng.Intn(100) + 1
 
+	start := time.Now()
+
 	fmt.Println("Welcome to the Number Guessing Game!")
 	fmt.Println("I'm thinking of a number between 1 and 100.")
 	fmt.Println("You have 5 chances to guess the correct number.")
@@ -82,7 +84,11 @@ func playGame() {
 			}
 
 		} else {
+			elapsed := time.Since(start)
+			minutes := int(elapsed.Minutes())
+			seconds := int(elapsed.Seconds()) % 60
 			fmt.Printf("Congratulations! You guessed the correct number in %d attempt\n", attempt)
+			fmt.Printf("You take %d minutes and %d seconds to guess the number", minutes, seconds)
 			break
 		}
 
