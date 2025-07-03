@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"math/rand"
+	"strconv"
 	"time"
 )
 
@@ -41,6 +42,10 @@ func playGame() {
 		fmt.Printf("%d.%s (%d chances) \n", i+1, diff.difficult, diff.chance)
 	}
 
+	str := string(strconv.Itoa(rightAnswer))
+	fmt.Println(str)
+	fmt.Println(string(str[1]))
+
 	for {
 		fmt.Printf("Enter your choice: ")
 		fmt.Scanln(&playerChoice)
@@ -59,38 +64,44 @@ func playGame() {
 
 	fmt.Println("Let's start the game!")
 
+	gameLogic(playerGuess, rightAnswer, attempt, start, str, selected)
+}
+
+func gameLogic(playerGuess uint8, rightAnswer int, attempt uint8, start time.Time, hint string, selected *Difficult) {
 	for {
 		fmt.Printf("Enter your guess: ")
 		fmt.Scanln(&playerGuess)
 
-		if playerGuess < uint8(rightAnswer) {
-			fmt.Printf("Incorrect! the number is greater than %d.\n", playerGuess)
-			selected.chance--
-			attempt += 1
-
-			if selected.chance == 0 {
-				fmt.Println("Game over!")
-				break
-			}
-
-		} else if playerGuess > uint8(rightAnswer) {
-			fmt.Printf("Incorrect! the number is less than %d.\n", playerGuess)
-			selected.chance--
-			attempt += 1
-
-			if selected.chance == 0 {
-				fmt.Println("Game over!")
-				break
-			}
-
-		} else {
+		if playerGuess == uint8(rightAnswer) {
 			elapsed := time.Since(start)
 			minutes := int(elapsed.Minutes())
 			seconds := int(elapsed.Seconds()) % 60
 			fmt.Printf("Congratulations! You guessed the correct number in %d attempt\n", attempt)
-			fmt.Printf("You take %d minutes and %d seconds to guess the number", minutes, seconds)
+			fmt.Printf("You take %d minutes and %d seconds to guess the number \n", minutes, seconds)
 			break
 		}
 
+		if playerGuess < uint8(rightAnswer) {
+			fmt.Printf("Incorrect! the number is greater than %d.\n", playerGuess)
+		} else if playerGuess > uint8(rightAnswer) {
+			fmt.Printf("Incorrect! the number is less than %d.\n", playerGuess)
+		}
+
+		// hint
+		if selected.difficult == "Easy" && attempt == 6 {
+			fmt.Println("Hint! the last number of number guess is", string(hint[1]))
+		} else if selected.difficult == "Medium" && attempt == 2 {
+			fmt.Println("Hint! the last number of number guess is", string(hint[1]))
+		} else if selected.difficult == "Hard" && attempt == 1 {
+			fmt.Println("Hint! the last number of number guess is", string(hint[1]))
+		}
+
+		attempt++
+		selected.chance--
+
+		if selected.chance == 0 {
+			fmt.Println("Game Over!")
+			break
+		}
 	}
 }
