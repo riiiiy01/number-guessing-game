@@ -10,14 +10,15 @@ import (
 type Difficult struct {
 	difficult string
 	chance    uint8
+	maxChance uint8
 }
 
 func playGame() {
 	var selectDifficult []*Difficult
 
-	easy := &Difficult{"Easy", 10}
-	medium := &Difficult{"Medium", 5}
-	hard := &Difficult{"Hard", 3}
+	easy := &Difficult{"Easy", 10, 10}
+	medium := &Difficult{"Medium", 5, 5}
+	hard := &Difficult{"Hard", 3, 3}
 
 	selectDifficult = append(selectDifficult, easy, medium, hard)
 
@@ -28,6 +29,7 @@ func playGame() {
 	var playerChoice uint8
 	var playerGuess uint8
 
+	maxScore := 100
 	rightAnswer := rng.Intn(100) + 1
 
 	start := time.Now()
@@ -43,8 +45,6 @@ func playGame() {
 	}
 
 	str := string(strconv.Itoa(rightAnswer))
-	fmt.Println(str)
-	fmt.Println(string(str[1]))
 
 	for {
 		fmt.Printf("Enter your choice: ")
@@ -64,22 +64,13 @@ func playGame() {
 
 	fmt.Println("Let's start the game!")
 
-	gameLogic(playerGuess, rightAnswer, attempt, start, str, selected)
+	gameLogic(playerGuess, rightAnswer, attempt, start, str, maxScore, selected)
 }
 
-func gameLogic(playerGuess uint8, rightAnswer int, attempt uint8, start time.Time, hint string, selected *Difficult) {
+func gameLogic(playerGuess uint8, rightAnswer int, attempt uint8, start time.Time, hint string, maxScore int, selected *Difficult) {
 	for {
 		fmt.Printf("Enter your guess: ")
 		fmt.Scanln(&playerGuess)
-
-		if playerGuess == uint8(rightAnswer) {
-			elapsed := time.Since(start)
-			minutes := int(elapsed.Minutes())
-			seconds := int(elapsed.Seconds()) % 60
-			fmt.Printf("Congratulations! You guessed the correct number in %d attempt\n", attempt)
-			fmt.Printf("You take %d minutes and %d seconds to guess the number \n", minutes, seconds)
-			break
-		}
 
 		if playerGuess < uint8(rightAnswer) {
 			fmt.Printf("Incorrect! the number is greater than %d.\n", playerGuess)
@@ -99,8 +90,26 @@ func gameLogic(playerGuess uint8, rightAnswer int, attempt uint8, start time.Tim
 		attempt++
 		selected.chance--
 
+		// score
+		var countScore int
+		var score int
+		countScore = maxScore - ((int(attempt) - 1) * (maxScore / int(selected.maxChance)))
+
+		score = max(countScore, 10)
+
+		if playerGuess == uint8(rightAnswer) {
+			elapsed := time.Since(start)
+			minutes := int(elapsed.Minutes())
+			seconds := int(elapsed.Seconds()) % 60
+			fmt.Printf("Congratulations! You guessed the correct number in %d attempt\n", attempt)
+			fmt.Printf("You take %d minutes and %d seconds to guess the number \n", minutes, seconds)
+			fmt.Printf("you got score: %d \n", score)
+			break
+		}
+
 		if selected.chance == 0 {
 			fmt.Println("Game Over!")
+			fmt.Printf("you got score: %d \n", score)
 			break
 		}
 	}
